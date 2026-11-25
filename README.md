@@ -70,9 +70,6 @@ docker compose up --build
 - `POST /payments/simulate`, `GET /payments/my-payments` — Payment simulation & history
 - `GET /notifications`, `PATCH /notifications/:id/read`, `PATCH /notifications/read-all` — Notifications
 
-## Screenshots
-Add screenshots of your running app (`HomePage`, `ProductsPage`, `CartPage`, `CheckoutPage`, `OrdersPage`, and `AdminDashboardPage`) under `docs/screenshots/` before publishing to GitHub.
-
 ## Troubleshooting
 - **MongoDB connection refused**: Ensure the `mongod` service is running on port `27017` or start MongoDB via Docker Compose.
 - **Port already in use (`EADDRINUSE`)**: Stop any process occupying ports `5000–5006` or `5173`.
