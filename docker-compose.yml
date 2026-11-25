@@ -1,0 +1,141 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: shopsphere-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - shopsphere-net
+
+  user-service:
+    build: ./services/user-service
+    container_name: shopsphere-user-service
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb://mongodb:27017/shopsphere_users
+      - JWT_SECRET=shopsphere_super_secret_jwt_key_change_in_production
+    depends_on:
+      - mongodb
+    networks:
+      - shopsphere-net
+
+  product-service:
+    build: ./services/product-service
+    container_name: shopsphere-product-service
+    ports:
+      - "5002:5002"
+    environment:
+      - PORT=5002
+      - MONGO_URI=mongodb://mongodb:27017/shopsphere_products
+    depends_on:
+      - mongodb
+    networks:
+      - shopsphere-net
+
+  cart-service:
+    build: ./services/cart-service
+    container_name: shopsphere-cart-service
+    ports:
+      - "5003:5003"
+    environment:
+      - PORT=5003
+      - MONGO_URI=mongodb://mongodb:27017/shopsphere_carts
+      - PRODUCT_SERVICE_URL=http://product-service:5002
+    depends_on:
+      - mongodb
+      - product-service
+    networks:
+      - shopsphere-net
+
+  order-service:
+    build: ./services/order-service
+    container_name: shopsphere-order-service
+    ports:
+      - "5004:5004"
+    environment:
+      - PORT=5004
+      - MONGO_URI=mongodb://mongodb:27017/shopsphere_orders
+      - CART_SERVICE_URL=http://cart-service:5003
+      - PRODUCT_SERVICE_URL=http://product-service:5002
+      - NOTIFICATION_SERVICE_URL=http://notification-service:5006
+    depends_on:
+      - mongodb
+    networks:
+      - shopsphere-net
+
+  payment-service:
+    build: ./services/payment-service
+    container_name: shopsphere-payment-service
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+      - MONGO_URI=mongodb://mongodb:27017/shopsphere_payments
+      - ORDER_SERVICE_URL=http://order-service:5004
+      - NOTIFICATION_SERVICE_URL=http://notification-service:5006
+    depends_on:
+      - mongodb
+    networks:
+      - shopsphere-net
+
+  notification-service:
+    build: ./services/notification-service
+    container_name: shopsphere-notification-service
+    ports:
+      - "5006:5006"
+    environment:
+      - PORT=5006
+      - MONGO_URI=mongodb://mongodb:27017/shopsphere_notifications
+    depends_on:
+      - mongodb
+    networks:
+      - shopsphere-net
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: shopsphere-api-gateway
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - JWT_SECRET=shopsphere_super_secret_jwt_key_change_in_production
+      - USER_SERVICE_URL=http://user-service:5001
+      - PRODUCT_SERVICE_URL=http://product-service:5002
+      - CART_SERVICE_URL=http://cart-service:5003
+      - ORDER_SERVICE_URL=http://order-service:5004
+      - PAYMENT_SERVICE_URL=http://payment-service:5005
+      - NOTIFICATION_SERVICE_URL=http://notification-service:5006
+    depends_on:
+      - user-service
+      - product-service
+      - cart-service
+      - order-service
+      - payment-service
+      - notification-service
+    networks:
+      - shopsphere-net
+
+  frontend:
+    build: ./frontend
+    container_name: shopsphere-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_GATEWAY_URL=http://localhost:5000/api
+    depends_on:
+      - api-gateway
+    networks:
+      - shopsphere-net
+
+volumes:
+  mongo_data:
+
+networks:
+  shopsphere-net:
+    driver: bridge

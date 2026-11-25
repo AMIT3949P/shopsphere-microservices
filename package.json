@@ -1,0 +1,15 @@
+{
+  "name": "shopsphere-microservices",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Complete Microservices-Based E-Commerce Application",
+  "scripts": {
+    "install:all": "npm install && npm --prefix api-gateway install && npm --prefix services/user-service install && npm --prefix services/product-service install && npm --prefix services/cart-service install && npm --prefix services/order-service install && npm --prefix services/payment-service install && npm --prefix services/notification-service install && npm --prefix frontend install",
+    "seed": "node services/product-service/src/seed.js",
+    "dev": "concurrently -n \"GATEWAY,USER,PRODUCT,CART,ORDER,PAYMENT,NOTIFY,CLIENT\" -c \"bgBlue.bold,bgGreen.bold,bgYellow.bold,bgMagenta.bold,bgCyan.bold,bgRed.bold,bgWhite.black.bold,bgGray.bold\" \"npm --prefix api-gateway run dev\" \"npm --prefix services/user-service run dev\" \"npm --prefix services/product-service run dev\" \"npm --prefix services/cart-service run dev\" \"npm --prefix services/order-service run dev\" \"npm --prefix services/payment-service run dev\" \"npm --prefix services/notification-service run dev\" \"npm --prefix frontend run dev\"",
+    "start": "concurrently \"npm --prefix api-gateway start\" \"npm --prefix services/user-service start\" \"npm --prefix services/product-service start\" \"npm --prefix services/cart-service start\" \"npm --prefix services/order-service start\" \"npm --prefix services/payment-service start\" \"npm --prefix services/notification-service start\" \"npm --prefix frontend run preview\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
